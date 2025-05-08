@@ -8,24 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PostgresDataSource = void 0;
 exports.default = initializeDataSource;
 const typeorm_1 = require("typeorm");
-const configuration_1 = __importDefault(require("./configuration"));
+const configuration_1 = require("./configuration");
 exports.PostgresDataSource = new typeorm_1.DataSource({
     type: "postgres",
-    host: configuration_1.default.DB_HOST,
-    port: parseInt(process.env.DB_PORT || "5432"),
-    username: configuration_1.default.DB_USERNAME,
-    password: configuration_1.default.DB_PASSWORD,
-    database: configuration_1.default.DB_NAME,
+    host: configuration_1.config.DB_HOST,
+    port: parseInt(configuration_1.config.DB_PORT || "5432"),
+    username: configuration_1.config.DB_USERNAME,
+    password: configuration_1.config.DB_PASSWORD,
+    database: configuration_1.config.DB_NAME,
     synchronize: true,
     logging: false,
-    entities: ["src/main/data/entity/*.ts"],
+    entities: ["dist/main/data/entity/*.js"],
     migrations: [],
     subscribers: [],
 });
