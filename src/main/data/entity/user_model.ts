@@ -1,7 +1,7 @@
 import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("users")
-export class User extends BaseEntity {
+export class User{
     
     @PrimaryGeneratedColumn("uuid")
     id: string
@@ -21,10 +21,10 @@ export class User extends BaseEntity {
     @Column({ type: "varchar", length: 11, nullable: true })
     phone_number: string;
     
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     created_at: Date;
     
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     updated_at: Date;
     
     @Column({ type: "boolean", default: false })

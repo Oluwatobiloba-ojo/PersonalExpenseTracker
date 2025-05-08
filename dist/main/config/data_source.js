@@ -28,7 +28,7 @@ exports.PostgresDataSource = new typeorm_1.DataSource({
 });
 function initializeDataSource() {
     return __awaiter(this, void 0, void 0, function* () {
-        exports.PostgresDataSource.initialize()
+        yield exports.PostgresDataSource.initialize()
             .then(() => {
             console.log("Data Source has been initialized!");
         }).catch((err) => {

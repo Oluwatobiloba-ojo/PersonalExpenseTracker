@@ -3,7 +3,7 @@ import { User } from "./user_model";
 import { TRANSACTION_CATEGORY, TRANSACTION_TYPE } from "../enum/enum";
 
 @Entity("transactions")
-export class Transaction  extends BaseEntity {
+export class Transaction {
     @PrimaryGeneratedColumn("uuid")
     id: string;
     
@@ -22,10 +22,10 @@ export class Transaction  extends BaseEntity {
     @Column({type: "enum", enum: TRANSACTION_CATEGORY})
     category: string;
 
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     created_at: Date;
     
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     updated_at: Date;
 
     @Column({type: "varchar", length: 100})

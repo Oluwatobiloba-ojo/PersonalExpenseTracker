@@ -13,7 +13,7 @@ exports.Transaction = void 0;
 const typeorm_1 = require("typeorm");
 const user_model_1 = require("./user_model");
 const enum_1 = require("../enum/enum");
-let Transaction = class Transaction extends typeorm_1.BaseEntity {
+let Transaction = class Transaction {
     setUpTransaction() {
         this.created_at = new Date();
     }
@@ -47,11 +47,11 @@ __decorate([
     __metadata("design:type", String)
 ], Transaction.prototype, "category", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], Transaction.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], Transaction.prototype, "updated_at", void 0);
 __decorate([

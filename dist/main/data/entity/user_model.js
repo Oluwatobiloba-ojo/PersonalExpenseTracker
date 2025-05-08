@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
-let User = class User extends typeorm_1.BaseEntity {
+let User = class User {
     setUpUser() {
         this.created_at = new Date();
         this.is_active = true;
@@ -46,11 +46,11 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "phone_number", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], User.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], User.prototype, "updated_at", void 0);
 __decorate([

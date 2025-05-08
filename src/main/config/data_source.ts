@@ -17,7 +17,7 @@ export const PostgresDataSource  : DataSource = new DataSource({
 
 
 export default async function initializeDataSource() {
-    PostgresDataSource.initialize()
+   await PostgresDataSource.initialize()
                     .then(() => {
                         console.log("Data Source has been initialized!")
                     }).catch((err) => {

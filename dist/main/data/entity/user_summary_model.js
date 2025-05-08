@@ -30,11 +30,11 @@ __decorate([
     __metadata("design:type", String)
 ], UserSummary.prototype, "owner", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], UserSummary.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP" }),
+    (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
     __metadata("design:type", Date)
 ], UserSummary.prototype, "updated_at", void 0);
 __decorate([

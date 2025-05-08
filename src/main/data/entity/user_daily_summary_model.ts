@@ -1,9 +1,9 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user_model";
 import { TRANSACTION_CATEGORY } from "../enum/enum";
 
 @Entity("user_daily_summary")
-export class UserDailySummary {
+export class UserDailySummary{
 
     @PrimaryGeneratedColumn("uuid")
     id: string;
@@ -11,10 +11,10 @@ export class UserDailySummary {
     @ManyToOne(() => User, (user) => user.id)
     owner: string;
 
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     created_at: Date;
     
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     updated_at: Date;
 
     @Column({type: "bigint"})

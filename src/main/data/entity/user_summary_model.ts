@@ -1,4 +1,4 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./user_model";
 import { TRANSACTION_CATEGORY } from "../enum/enum";
 
@@ -11,10 +11,10 @@ export class UserSummary {
     @OneToOne(() => User, (user) => user.id)
     owner: string;
 
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     created_at: Date;
     
-    @Column({type: "timestamp with time zone", default: () => "CURRENT_TIMESTAMP"})
+    @Column({type: "timestamp with time zone"})
     updated_at: Date;
 
     @Column({type: "bigint"})
