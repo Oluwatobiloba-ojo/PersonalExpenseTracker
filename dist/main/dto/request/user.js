@@ -17,28 +17,36 @@ class UserDto {
 exports.UserDto = UserDto;
 __decorate([
     (0, classes_1.AutoMap)(),
+    (0, class_validator_1.ValidateIf)((o) => o.action_type === "create_password"),
+    (0, class_validator_1.IsNotEmpty)({ message: "id is required" }),
     __metadata("design:type", String)
 ], UserDto.prototype, "id", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: "First name is required" }),
     (0, classes_1.AutoMap)(),
+    (0, class_validator_1.ValidateIf)((o) => o.action_type === "create_user"),
+    (0, class_validator_1.IsNotEmpty)({ message: "First name is required" }),
     __metadata("design:type", String)
 ], UserDto.prototype, "first_name", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: "Last name is required" }),
     (0, classes_1.AutoMap)(),
+    (0, class_validator_1.ValidateIf)((o) => o.action_type === "create_user"),
+    (0, class_validator_1.IsNotEmpty)({ message: "Last name is required" }),
     __metadata("design:type", String)
 ], UserDto.prototype, "last_name", void 0);
 __decorate([
+    (0, classes_1.AutoMap)(),
+    (0, class_validator_1.ValidateIf)((o) => o.action_type === "create_user"),
     (0, class_validator_1.IsNotEmpty)({ message: "Email is required" }),
     (0, class_validator_1.IsEmail)({}, { message: "Email must be a valid email address." }),
-    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], UserDto.prototype, "email", void 0);
 __decorate([
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.Matches)(/^\+?\d{7,15}$/, { message: 'Phone number must be 7–15 digits and may start with +.', }),
     (0, classes_1.AutoMap)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsPhoneNumber)(null, { message: "Phone number must be a valid phone number." })
+    // @Matches(/^\+?\d{7,15}$/, 
+    //     {message: 'Phone number must be 7–15 digits and may start with +.',})
+    ,
     __metadata("design:type", String)
 ], UserDto.prototype, "phone_number", void 0);
 __decorate([
@@ -53,4 +61,11 @@ __decorate([
     (0, classes_1.AutoMap)(),
     __metadata("design:type", Boolean)
 ], UserDto.prototype, "is_active", void 0);
+__decorate([
+    (0, classes_1.AutoMap)(),
+    (0, class_validator_1.ValidateIf)((o) => o.action_type === "create_password"),
+    (0, class_validator_1.IsNotEmpty)({ message: "Password is required" }),
+    (0, class_validator_1.IsStrongPassword)({ minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1 }),
+    __metadata("design:type", String)
+], UserDto.prototype, "password", void 0);
 //# sourceMappingURL=user.js.map

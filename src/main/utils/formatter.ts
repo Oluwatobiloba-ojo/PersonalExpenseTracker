@@ -2,14 +2,11 @@ import { ValidationError } from "class-validator";
 import { errorResponse } from "../error/response";
 
 export function formatError(validationErrors: ValidationError[]) {
-    var messageData : Map<string, string> = new Map<string, string>();
-    validationErrors.forEach((error) => {
-        var value = messageData.get(error.property);
-        if(!value){
-            var message = getMessage(error.constraints)
-            messageData.set(error.property, message)
-        }
-    })
+    const messageData = new Map<string, string>(
+        validationErrors
+          .filter((error) => !!error.constraints)
+          .map((error) => [error.property, getMessage(error.constraints)])
+      );
     
     const plainMessageObject: Record<string, string> = Object.fromEntries(messageData);
     
