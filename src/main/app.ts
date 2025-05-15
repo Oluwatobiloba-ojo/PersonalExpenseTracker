@@ -1,5 +1,6 @@
 import express from 'express';
 import initializeDataSource from './config/data_source';
+import { createUserMappings } from './mapper/user_mapper';
 
 
 const app = express();
@@ -11,6 +12,7 @@ app.get('/', (req, res) => {
 
 app.listen(port, async() => {
   await initializeDataSource();
+  createUserMappings();
 
   console.log(`Express is listening at http://localhost:${port}`);
 });

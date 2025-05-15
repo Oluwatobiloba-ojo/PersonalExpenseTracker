@@ -10,10 +10,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
+const classes_1 = require("@automapper/classes");
 const typeorm_1 = require("typeorm");
 let User = class User {
     setUpUser() {
         this.created_at = new Date();
+        this.updated_at = new Date();
         this.is_active = true;
     }
     updateUser() {
@@ -23,38 +25,47 @@ let User = class User {
 exports.User = User;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)("uuid"),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 100 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 100, nullable: false }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "first_name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 100 }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 100, nullable: false }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "last_name", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 100, unique: true, nullable: false }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 5000, nullable: false }),
+    (0, typeorm_1.Column)({ type: "varchar", length: 5000, nullable: true }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "varchar", length: 11, nullable: true }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", String)
 ], User.prototype, "phone_number", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", Date)
 ], User.prototype, "created_at", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "timestamp with time zone" }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", Date)
 ], User.prototype, "updated_at", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", default: false }),
+    (0, classes_1.AutoMap)(),
     __metadata("design:type", Boolean)
 ], User.prototype, "is_active", void 0);
 __decorate([
