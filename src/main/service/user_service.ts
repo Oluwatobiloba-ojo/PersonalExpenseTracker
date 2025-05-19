@@ -6,7 +6,7 @@ import { mapper } from "../mapper/mapper";
 import { User } from "../data/entity/user_model";
 import { Repository } from "typeorm";
 import { userRepository } from "../data/repository/user.repository";
-import { USER_ALREADY_EXIST, USER_DOES_NOT_EXIST } from "../error/message";
+import { ID_REQUIRED, PASSWORD_ALREADY_EXIST, USER_ALREADY_EXIST, USER_DOES_NOT_EXIST } from "../error/message";
 import { IdentityService } from "./identity_service";
 import { hash } from "crypto";
 
@@ -41,7 +41,7 @@ export class UserService implements IdentityService {
         if(isError) {const errorResponse = formatError(error); throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
 
         if(!await this.isExistingUser(request))throw new AppError(USER_DOES_NOT_EXIST, 400);
-        else if(await this.isPasswordExisting(request)) {throw new AppError("Password already exists", 400)};
+        else if(await this.isPasswordExisting(request)) {throw new AppError(PASSWORD_ALREADY_EXIST, 400)};
 
         const hashedPassword = hash("sha256", request.password);
 
@@ -51,16 +51,6 @@ export class UserService implements IdentityService {
 
         return mapper.map(updatedUser, User, UserDto);
     }
-
-
-    getUserById(id: string): Promise<UserDto> {
-        throw new Error("Method not implemented.");
-    }
-
-    getAllUsers(): Promise<UserDto[]> {
-        throw new Error("Method not implemented.");
-    }
-
 
     async updateUser(request: UserDto): Promise<UserDto> {
         request.action_type = "update_user";
@@ -79,9 +69,33 @@ export class UserService implements IdentityService {
         return mapper.map(updatedUser, User, UserDto);
     }
 
+    async getUserById(id: string): Promise<UserDto> {
+        if(!id) {throw new AppError(ID_REQUIRED, 400)}
 
-    deleteUser(id: string): void {
-        throw new Error("Method not implemented.");
+        const foundUser: User = await this.users.findOne({ where: { id: id } });
+
+        if(!foundUser) throw new AppError(USER_DOES_NOT_EXIST, 400);
+        
+        return mapper.map(foundUser, User, UserDto);
+    }
+
+    async getAllUsers(): Promise<UserDto[]> {
+        const users: User[] = await this.users.find({ where: { is_active: true } })
+
+        return users.map(user => mapper.map(user, User, UserDto));
+    }
+
+
+
+    async deleteUser(id: string): Promise<void> {
+        if(!id) {throw new AppError(ID_REQUIRED, 400)}
+        var foundUser = await this.users.findOne({ where: { id: id } });
+        if(!foundUser) return;
+        if(foundUser.is_active){
+            await this.users.update({ id: id }, { is_active: false });
+            return;
+        }
+
     }
 
 
@@ -102,7 +116,6 @@ export class UserService implements IdentityService {
     private async isPasswordExisting(request: UserDto) {
         if (request.id) {
             const user = await this.users.findOneBy({id: request.id } );
-            console.log("User in is password existing", user?.password !== null);
             return user?.password !== null;
         }else if (request.email) {
             const user = await this.users.findOneBy({ email: request.email });

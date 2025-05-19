@@ -330,6 +330,147 @@ describe("User service: ", () => {
     });
 
 
+    describe("Test get all users if we create two users ", () => {
+        it("Should get all the users ", async() => {
+            var userDto: UserDto = new UserDto();
+            userDto.first_name = "oluwatobi";
+            userDto.last_name = "ojo";
+            userDto.email = "ojot630@gmail.com";
+        
+            var user: User = mapper.map(userDto, UserDto, User);
+            user.id = "1";
+            user.created_at = new Date();
+            user.updated_at = new Date();
+            user.is_active = true;
+
+            (userRepository.save as jest.Mock).mockResolvedValueOnce(user);
+
+            var result: UserDto = await userService.createUser(userDto);
+            expect(result).not.toBeNull();
+            expect(result.id).toBeTruthy();
+            expect(result.email).toBe(userDto.email);
+            expect(result.first_name).toBe(userDto.first_name);
+            expect(result.last_name).toBe(userDto.last_name);
+            expect(result.created_at).toBeTruthy();
+            expect(result.updated_at).toBeTruthy();
+            expect(result.is_active).toBeTruthy();
+
+
+            var userDto2: UserDto = new UserDto();
+            userDto2.first_name = "oluwatobi";
+            userDto2.last_name = "ojo";
+            userDto2.email = "ojot631@gmail.com";
+        
+            var user2: User = mapper.map(userDto2, UserDto, User);
+            user2.id = "1";
+            user2.created_at = new Date();
+            user2.updated_at = new Date();
+            user2.is_active = true;
+
+            (userRepository.save as jest.Mock).mockResolvedValueOnce(user2);
+
+            var newResult: UserDto = await userService.createUser(userDto2);
+            expect(newResult).not.toBeNull();
+            expect(newResult.id).toBeTruthy();
+            expect(newResult.email).toBe(userDto2.email);
+            expect(newResult.first_name).toBe(userDto2.first_name);
+            expect(newResult.last_name).toBe(userDto2.last_name);
+            expect(newResult.created_at).toBeTruthy();
+            expect(newResult.updated_at).toBeTruthy();
+            expect(newResult.is_active).toBeTruthy();
+            
+
+            const users: User[] = [user, user2];
+            (userRepository.find as jest.Mock).mockResolvedValueOnce(users);
+
+            var newUsers: UserDto[] = await userService.getAllUsers();
+
+            expect(newUsers).not.toBeNull();
+            expect(newUsers.length).toBe(2);
+            expect(newUsers[0].id).toBe(user.id);
+            expect(newUsers[0].email).toBe(user.email);
+            expect(newUsers[0].first_name).toBe(user.first_name);
+            expect(newUsers[1].id).toBe(user2.id);
+            expect(newUsers[1].email).toBe(user2.email);
+            expect(newUsers[1].first_name).toBe(user2.first_name);
+            expect(newUsers[0].created_at).toBeTruthy();
+            expect(newUsers[0].updated_at).toBeTruthy();
+            expect(newUsers[1].created_at).toBeTruthy();
+            expect(newUsers[1].updated_at).toBeTruthy();
+            expect(newUsers[0].is_active).toBeTruthy();
+            expect(newUsers[1].is_active).toBeTruthy();
+            expect(userRepository.find).toHaveBeenCalledTimes(1);
+        });
+    });
+
+
+    describe("Test get user by id if the id is not given ", () => {
+        it("Should throw an error that id is required ", async() => {
+            await expect(userService.getUserById("")).rejects.toThrow("id is required");
+        });
+    });
+
+
+    describe("Test get user by id if the id is not existing ", () => {
+        it("Should throw an error that user does not exist ", async() => {
+            (userRepository.findOne as jest.Mock).mockResolvedValueOnce(null);
+            await expect(userService.getUserById("1")).rejects.toThrow("User does not exist");
+        });
+    });
+
+    describe("Test get user by id if the id is existing ", () => {
+        it("Should get the user ", async() => {
+            var user: User = new User();
+            user.created_at = new Date();
+            user.updated_at = new Date();
+            user.is_active = true;
+            user.id = "1";
+            user.password = "password";
+            user.email = "newEMail";
+
+            (userRepository.findOne as jest.Mock).mockResolvedValueOnce(user);
+
+            var result: UserDto = await userService.getUserById(user.id);
+            expect(result.id).toBe(user.id);
+            expect(result.email).toBe(user.email);
+            expect(result.created_at).toBeTruthy();
+            expect(result.updated_at).toBeTruthy();
+            expect(result.is_active).toBeTruthy();
+            expect(result.password).toBe(user.password);
+            expect(userRepository.findOne).toHaveBeenCalledTimes(1);
+        });
+    });
+
+
+    describe("Test delete user if the id is not given ", () => {
+        it("Should throw an error that id is required ", async() => {
+            await expect(userService.deleteUser("")).rejects.toThrow("id is required");
+        });
+    });
+
+
+    describe("Test that if the id to delete the user ", () => {
+        it("Should delete the user ", async() => {
+            var user: User = new User();
+            user.created_at = new Date();
+            user.updated_at = new Date();
+            user.is_active = true;
+            user.id = "1";
+            user.password = "password";
+            user.email = "newEMail";
+
+            (userRepository.findOne as jest.Mock).mockResolvedValueOnce(user);
+
+            await userService.deleteUser(user.id);
+            
+            user.is_active = false;
+            expect(userRepository.update).toHaveBeenCalledTimes(1);
+            expect(userRepository.update).toHaveBeenCalledWith({ id: user.id }, { is_active: false });
+        });
+    });
+
+
+
 
 
 

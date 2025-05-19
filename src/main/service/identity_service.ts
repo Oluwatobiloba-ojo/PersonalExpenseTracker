@@ -9,7 +9,7 @@ export interface IdentityService {
 
     updateUser(request: UserDto): Promise<UserDto>;
 
-    deleteUser(id: string): void;
+    deleteUser(id: string): Promise<void>;
 
     createPassword(request: UserDto): Promise<UserDto>;
 }
