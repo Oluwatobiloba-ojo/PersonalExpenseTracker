@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsStrongPassword, Match
 export class UserDto {
 
     @AutoMap()
-    @ValidateIf((o) => o.action_type === "create_password")
+    @ValidateIf((o) => o.action_type === "create_password" || o.action_type === "update_user")
     @IsNotEmpty({message: "id is required"})
     id: string;
 
@@ -26,9 +26,7 @@ export class UserDto {
     
     @AutoMap()
     @IsOptional()
-    @IsPhoneNumber(null, {message: "Phone number must be a valid phone number."})
-    // @Matches(/^\+?\d{7,15}$/, 
-    //     {message: 'Phone number must be 7–15 digits and may start with +.',})
+    @IsPhoneNumber('NG', {message: "Phone number must be a valid phone number."})
     phone_number: string;
 
     @AutoMap()
@@ -47,8 +45,7 @@ export class UserDto {
     password: string;
 
     action_type: string;
-
-
 }
+
 
 

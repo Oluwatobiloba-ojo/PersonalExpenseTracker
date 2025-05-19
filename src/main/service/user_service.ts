@@ -21,7 +21,8 @@ export class UserService implements IdentityService {
         
         const isError = error.length > 0;
         
-        if(isError) {const errorResponse = formatError(error); throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
+        if(isError) {const errorResponse = formatError(error); 
+            throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
 
         if(await this.isExistingUser(request))throw new AppError(USER_ALREADY_EXIST, 400);
     
@@ -38,7 +39,7 @@ export class UserService implements IdentityService {
         const isError = error.length > 0;
         
         if(isError) {const errorResponse = formatError(error); throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
-        
+
         if(!await this.isExistingUser(request))throw new AppError(USER_DOES_NOT_EXIST, 400);
         else if(await this.isPasswordExisting(request)) {throw new AppError("Password already exists", 400)};
 
@@ -61,8 +62,21 @@ export class UserService implements IdentityService {
     }
 
 
-    updateUser(request: UserDto): Promise<UserDto> {
-        throw new Error("Method not implemented.");
+    async updateUser(request: UserDto): Promise<UserDto> {
+        request.action_type = "update_user";
+        const error : ValidationError[] = await validate(request);
+        const isError = error.length > 0;
+        
+        if (isError) {const errorResponse = formatError(error); 
+            throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
+        
+        if(! await this.isExistingUser(request)) throw new AppError(USER_DOES_NOT_EXIST, 400);
+
+        await this.users.update({id: request.id}, {first_name: request.first_name, last_name: request.last_name, phone_number: request.phone_number});
+        
+        const updatedUser: User = await this.users.findOne({ where: { id: request.id } });
+
+        return mapper.map(updatedUser, User, UserDto);
     }
 
 

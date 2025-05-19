@@ -270,7 +270,64 @@ describe("User service: ", () => {
         });
     }); 
 
-    // describe("Test create password if ")
+    describe("Test update user if the id is not given", () => {
+        it("Should throw an error that id is required ", async() => {
+
+            var userDto : UserDto = new UserDto();
+            userDto.first_name = "oluwatobi";
+            userDto.last_name = "ojo";
+
+            const responseError = {
+                status: 'error',
+                message: {
+                  'id' : 'id is required'
+                },statusCode: 400
+            }
+
+            await expect(userService.updateUser(userDto)).rejects.toThrow(JSON.stringify(responseError));
+        });
+    });
+
+    describe("Test update user if the id is not existing ", () => {
+        it("Should throw an error that user does not exist ", async() => {
+            var userDto : UserDto = new UserDto();
+            userDto.id = "1";
+            userDto.first_name = "oluwatobi";
+            userDto.last_name = "ojo";
+
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(false);
+
+            await expect(userService.updateUser(userDto)).rejects.toThrow("User does not exist");
+        });
+    });
+
+    describe("Test update user if the id is existing and the data is valid", () => {
+        it("Should update the user ", async() => {
+            var userDto : UserDto = new UserDto();
+            userDto.id = "1";
+            userDto.first_name = "oluwatobi";
+            userDto.last_name = "ojo";
+
+            var exitingUser: User = mapper.map(userDto, UserDto, User);
+            exitingUser.created_at = new Date();
+            exitingUser.updated_at = new Date();
+            exitingUser.is_active = true;
+
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(true);
+            (userRepository.update as jest.Mock).mockResolvedValueOnce(exitingUser);
+
+            (userRepository.findOne as jest.Mock).mockResolvedValueOnce(exitingUser);
+
+            var result: UserDto = await userService.updateUser(userDto);
+            expect(result).not.toBeNull();
+            expect(result.id).toBe(userDto.id);
+            expect(result.first_name).toBe(userDto.first_name);
+            expect(result.last_name).toBe(userDto.last_name);
+            expect(result.created_at).toBeTruthy();
+            expect(result.updated_at).toBeTruthy();
+            expect(result.is_active).toBeTruthy();
+        });
+    });
 
 
 
