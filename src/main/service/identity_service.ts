@@ -12,4 +12,6 @@ export interface IdentityService {
     deleteUser(id: string): Promise<void>;
 
     createPassword(request: UserDto): Promise<UserDto>;
+
+    login(request: UserDto): Promise<UserDto>
 }

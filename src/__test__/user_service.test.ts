@@ -7,18 +7,30 @@ import { User } from "../main/data/entity/user_model";
 import { IdentityService } from "../main/service/identity_service";
 import { hash } from "crypto";
 import 'reflect-metadata';
+import { otpGeneratorService } from "../main/service/otp_generator_service";
+import { OtpService } from "../main/service/otp_service";
+import { NodeMailerService } from "../main/service/node_mailer_service";
+import { EmailService } from "../main/service/email_service";
 
 
 jest.mock("../main/data/repository/user.repository")
+jest.mock("../main/service/otp_generator_service");
+jest.mock("../main/service/node_mailer_service");
 
-describe("User service: ", () => {
+describe("User service Test: ", () => {
     
     let userService : IdentityService;
+    let generateOtpService : OtpService
+    let emailService : EmailService;
 
     beforeAll(async() => {
         createUserMappings();
-       
-       userService = new UserService();
+        userService = new UserService();
+        generateOtpService = new otpGeneratorService();
+        emailService = new NodeMailerService();
+
+        (userService as any).otpService = generateOtpService;
+        (userService as any).emailService = emailService;
     });
 
 
@@ -468,6 +480,94 @@ describe("User service: ", () => {
             expect(userRepository.update).toHaveBeenCalledWith({ id: user.id }, { is_active: false });
         });
     });
+
+    describe("Test login if the request data needed for login is not given ", () => {
+        it("Should throw an error that email and password is required ", async() => {
+            var userDto: UserDto = new UserDto();
+
+            const responseError = {
+                status: 'error',
+                message: {
+                  'email' : 'Email is required',
+                  'password' : 'Password is required'
+                },statusCode: 400
+            }
+
+            await expect(userService.login(userDto)).rejects.toThrow(JSON.stringify(responseError));
+        });
+    });
+
+
+    describe("Test login if the email does not exist ", () => {
+        it("Should throw an error that user does not exist ", async() => {
+            var userDto: UserDto = new UserDto();
+            userDto.email = "olakunle@gmail.com";
+            userDto.password = "Password123@";
+
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(false);
+            await expect(userService.login(userDto)).rejects.toThrow("User does not exist");
+        });
+    });
+
+    describe("Test login if it was the first time trying to login", () => {
+        it("Should send am email to that user about their otp", async() => {
+            var userDto: UserDto = new UserDto();
+            userDto.email = "olakunle@gmail.com";
+            userDto.password = "Password123@";
+            
+            var user: User = mapper.map(userDto, UserDto, User);
+            user.is_enabled = false;
+            user.is_active = true;
+            user.first_name = "oluwatobi";
+            user.password = hash("sha256", userDto.password);
+
+            var otp = "123456";
+            
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(true);
+            (userRepository.findOne as jest.Mock).mockReturnValueOnce(user);
+            (generateOtpService.generate as jest.Mock).mockReturnValueOnce(otp);
+            (emailService.sendEmail as jest.Mock).mockResolvedValueOnce(true);
+        
+            
+            const response = await userService.login(userDto);
+            expect(response).toBeTruthy();
+            expect(response.access_token).toBeFalsy();
+            expect(response.is_enabled).toBeTruthy();
+            expect(userRepository.update).toHaveBeenCalledTimes(1);
+            expect(userRepository.update).toHaveBeenCalledWith({ id: user.id }, { is_enabled: true });
+            expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
+            expect(generateOtpService.generate).toHaveBeenCalledTimes(1);
+            expect(generateOtpService.generate).toHaveBeenCalledWith(user.id);
+        });
+    });
+
+    describe("Test login if the user is already enabled", () => {
+        it("Should return a refresh token and access token", async() => {
+            var userDto: UserDto = new UserDto();
+            userDto.email = "olakunle@gmail.com";
+            userDto.password = "Password123@";
+            
+            var user: User = mapper.map(userDto, UserDto, User);
+            user.is_enabled = true;
+            user.is_active = true;
+            user.first_name = "oluwatobi";
+            user.password = hash("sha256", userDto.password);
+
+            
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(true);
+            (userRepository.findOne as jest.Mock).mockReturnValueOnce(user);
+
+            const response : UserDto = await userService.login(userDto);
+            console.log("Response is this ", response);
+            expect(response).toBeTruthy();
+            expect(response.access_token).toBeTruthy();
+        });
+    });
+
+    
+
+
+
 
 
 

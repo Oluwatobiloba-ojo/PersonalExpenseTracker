@@ -19,7 +19,7 @@ export class UserDto {
     last_name: string;
 
     @AutoMap()
-    @ValidateIf((o) => o.action_type === "create_user")
+    @ValidateIf((o) => o.action_type === "create_user" || o.action_type === "login")
     @IsNotEmpty({message: "Email is required"})
     @IsEmail({}, {message: "Email must be a valid email address."})
     email: string;
@@ -39,12 +39,17 @@ export class UserDto {
     is_active: boolean;
 
     @AutoMap()
-    @ValidateIf((o) => o.action_type === "create_password")
+    @ValidateIf((o) => o.action_type === "create_password" || o.action_type === "login")
     @IsNotEmpty({message: "Password is required"})
     @IsStrongPassword({minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1},)
     password: string;
 
+    @AutoMap()
+    is_enabled: boolean;
+
     action_type: string;
+
+    access_token: string;
 }
 
 

@@ -47,6 +47,9 @@ export class User{
     @Column({ type: "boolean", default: false })
     is_active: boolean;
 
+    @AutoMap()
+    @Column({type: "boolean", default: false})
+    is_enabled: boolean;
     
     @BeforeInsert()
     setUpUser() {

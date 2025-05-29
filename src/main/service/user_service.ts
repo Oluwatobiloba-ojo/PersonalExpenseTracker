@@ -9,20 +9,24 @@ import { userRepository } from "../data/repository/user.repository";
 import { ID_REQUIRED, PASSWORD_ALREADY_EXIST, USER_ALREADY_EXIST, USER_DOES_NOT_EXIST } from "../error/message";
 import { IdentityService } from "./identity_service";
 import { hash } from "crypto";
+import { OtpService } from "./otp_service";
+import { otpGeneratorService } from "./otp_generator_service";
+import { EmailService } from "./email_service";
+import { NodeMailerService } from "./node_mailer_service";
+import { AuthService } from "./auth_service";
+import { JwtService } from "./jwt_auth_service";
 
 export class UserService implements IdentityService {
 
-    private readonly users: Repository<User> = userRepository;
+    private users: Repository<User> = userRepository;
+    private otpService: OtpService = new otpGeneratorService();
+    private emailService: EmailService = new NodeMailerService();
+    private auth_service: AuthService = new JwtService();
 
     async createUser(request: UserDto) : Promise<UserDto> {
         request.action_type = "create_user";
 
-        const error : ValidationError[] = await validate(request);
-        
-        const isError = error.length > 0;
-        
-        if(isError) {const errorResponse = formatError(error); 
-            throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
+        await this.validateRequest(request);
 
         if(await this.isExistingUser(request))throw new AppError(USER_ALREADY_EXIST, 400);
     
@@ -34,31 +38,19 @@ export class UserService implements IdentityService {
     async createPassword(request: UserDto): Promise<UserDto> {
         request.action_type = "create_password";
         
-        const error : ValidationError[] = await validate(request);
-        
-        const isError = error.length > 0;
-        
-        if(isError) {const errorResponse = formatError(error); throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
-
+        await this.validateRequest(request);
+    
         if(!await this.isExistingUser(request))throw new AppError(USER_DOES_NOT_EXIST, 400);
         else if(await this.isPasswordExisting(request)) {throw new AppError(PASSWORD_ALREADY_EXIST, 400)};
 
-        const hashedPassword = hash("sha256", request.password);
+        await this.users.update({ id: request.id }, { password: hash("sha256", request.password) });
 
-        await this.users.update({ id: request.id }, { password: hashedPassword });
-
-        const updatedUser: User = await this.users.findOne({ where: { id: request.id } });
-
-        return mapper.map(updatedUser, User, UserDto);
+        return mapper.map(await this.users.findOne({ where: { id: request.id } }), User, UserDto);
     }
 
     async updateUser(request: UserDto): Promise<UserDto> {
         request.action_type = "update_user";
-        const error : ValidationError[] = await validate(request);
-        const isError = error.length > 0;
-        
-        if (isError) {const errorResponse = formatError(error); 
-            throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);}
+        await this.validateRequest(request);
         
         if(! await this.isExistingUser(request)) throw new AppError(USER_DOES_NOT_EXIST, 400);
 
@@ -86,7 +78,6 @@ export class UserService implements IdentityService {
     }
 
 
-
     async deleteUser(id: string): Promise<void> {
         if(!id) {throw new AppError(ID_REQUIRED, 400)}
         var foundUser = await this.users.findOne({ where: { id: id } });
@@ -98,12 +89,56 @@ export class UserService implements IdentityService {
 
     }
 
+    
+    async login(request: UserDto): Promise<UserDto> {
+        request.action_type = "login";
+        await this.validateRequest(request);
+        
+        if(!await this.isExistingUser(request)) throw new AppError(USER_DOES_NOT_EXIST, 400);
+        
+        var user = await this.users.findOne({ where: { email: request.email } });
+
+        var passwordIsNotMatch: boolean = user?.password !== hash("sha256", request.password);
+        if(passwordIsNotMatch) {throw new AppError("Invalid credentials", 401);}
+        
+        if(!user.is_enabled)    {return await this.initLogin(user);
+        }else   {return await this.accessToken(user);} 
+    }
+
 
     
 
 
     
     
+    private async accessToken(user: User) {
+        var token = await this.auth_service.generateToken(user.id);
+        console.log("Token is this ", token);
+        var userDto: UserDto = mapper.map(user, User, UserDto);
+        userDto.access_token = token;
+        return userDto;
+    }
+
+    private async initLogin(user: User) {
+        var otp: string = await this.otpService.generate(user.id);
+        console.log("Otp is this ", otp);
+        var message = `<h1>Please confirm your email </h1>
+                        <p> here is your OTP code:-> ${otp} </p>`;
+        await this.emailService.sendEmail(user.email, "Your OTP Code", message);
+        user.is_enabled = true;
+        await this.users.update({ id: user.id }, { is_enabled: true });
+        return mapper.map(user, User, UserDto);
+    }
+
+    private async validateRequest(request: UserDto) {
+        const error: ValidationError[] = await validate(request);
+        const isError = error.length > 0;
+        if (isError) {
+            const errorResponse = formatError(error);
+            throw new AppError(JSON.stringify(errorResponse), errorResponse.statusCode);
+        }
+    }
+
     private async isExistingUser(request: UserDto): Promise<boolean> {
         if (request.id) {
             return await this.users.existsBy({  id: request.id } );
@@ -123,13 +158,7 @@ export class UserService implements IdentityService {
         }
         return false;
     }
-    
-
-
-
-    
-
-
-
 }
+
+
 
