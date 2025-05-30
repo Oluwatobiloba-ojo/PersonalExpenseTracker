@@ -15,8 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const data_source_1 = __importDefault(require("./config/data_source"));
 const user_mapper_1 = require("./mapper/user_mapper");
+const configuration_1 = __importDefault(require("./config/configuration"));
 const app = (0, express_1.default)();
-const port = 3000;
+const port = configuration_1.default.PORT;
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });

@@ -16,6 +16,7 @@ export class otpGeneratorService implements OtpService {
         otp.otp = otp_generator.generate(6, {upperCaseAlphabets: false,lowerCaseAlphabets: false,specialChars: false,});
         otp.created_at = new Date();
         var savedOtp: OtpModel = await this.otps.save(otp);
+        console.log("Saved otp is this ", savedOtp);
         return savedOtp.otp;
     }
 

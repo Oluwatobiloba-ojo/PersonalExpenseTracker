@@ -16,7 +16,7 @@ export class UserController {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
-    }
+    };
 
     static createPassword = async (req: Request, res: Response) => { 
         try {
@@ -26,7 +26,7 @@ export class UserController {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
-    }
+    };
 
     static updateUser = async (req: Request, res: Response) => {
         try {
@@ -36,7 +36,7 @@ export class UserController {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
-    }
+    };
 
     static getUserById = async (req: Request, res: Response) => {
         try {
@@ -46,6 +46,6 @@ export class UserController {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
-    }
+    };
 
 }

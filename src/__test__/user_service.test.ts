@@ -11,6 +11,7 @@ import { otpGeneratorService } from "../main/service/otp_generator_service";
 import { OtpService } from "../main/service/otp_service";
 import { NodeMailerService } from "../main/service/node_mailer_service";
 import { EmailService } from "../main/service/email_service";
+import { INVALID_CREDIENTIALS, USER_DOES_NOT_EXIST } from "../main/error/message";
 
 
 jest.mock("../main/data/repository/user.repository")
@@ -564,8 +565,72 @@ describe("User service Test: ", () => {
         });
     });
 
-    
 
+    describe("Test init login if the request data needed for init login is not given ", () => {
+        it("Should throw an error that email and otp is required ", async() => {
+            var userDto: UserDto = new UserDto();
+        
+            const responseError = {
+                status: 'error',
+                message: {
+                  'email' : 'Email is required',
+                  'otp' : 'OTP is required'
+                },statusCode: 400
+            }
+
+            await expect(userService.initLogin(userDto)).rejects.toThrow(JSON.stringify(responseError));
+        });
+    });
+
+    describe("Test init login if the email does not exist ", () => {
+        it("Should throw that user does not exist ", async() => {
+            var userDto : UserDto = new UserDto();
+            userDto.email = "wrong@gmail.com";
+            userDto.otp = "120356";
+
+            (userRepository.existsBy as jest.Mock).mockResolvedValueOnce(false);
+
+            await expect(userService.initLogin(userDto)).rejects.toThrow(USER_DOES_NOT_EXIST);
+        });
+    });
+
+
+    describe("Test init login if the email is existing but the otp does not match the email ", () => {
+        it("Should throw an invalid credientials ", async() => {
+            var userDto : UserDto = new UserDto();
+            userDto.email = "correct@gmail.com";
+            userDto.otp = "123456";
+
+            (userRepository.existsBy as jest.Mock).mockReturnValueOnce(true);
+            var user : User = mapper.map(userDto, UserDto, User);
+            user.id = "1098669287";
+            (userRepository.findOne as jest.Mock).mockReturnValueOnce(user);
+
+            (generateOtpService.verify as jest.Mock).mockReturnValueOnce(false);
+
+            await expect(userService.initLogin(userDto)).rejects.toThrow(INVALID_CREDIENTIALS);
+        });
+    });
+
+
+    describe("Test init login if the email is valid and otp ", () => {
+        it("Should return the access token ", async() => {
+            var userDto: UserDto = new UserDto();
+            userDto.email = "correct@gmail.com";
+            userDto.otp = "123456";
+
+            (userRepository.existsBy as jest.Mock).mockReturnValueOnce(true);
+            var user : User = mapper.map(userDto, UserDto, User);
+            user.id = "1098669287";
+            (userRepository.findOne as jest.Mock).mockReturnValueOnce(user);
+
+            (generateOtpService.verify as jest.Mock).mockReturnValueOnce(true);
+
+            var response : UserDto = await userService.initLogin(userDto);
+            console.log("Response is this ", response);
+            expect(response.access_token).toBeTruthy();
+        });
+    });
 
 
 

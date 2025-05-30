@@ -6,7 +6,7 @@ import { mapper } from "../mapper/mapper";
 import { User } from "../data/entity/user_model";
 import { Repository } from "typeorm";
 import { userRepository } from "../data/repository/user.repository";
-import { ID_REQUIRED, PASSWORD_ALREADY_EXIST, USER_ALREADY_EXIST, USER_DOES_NOT_EXIST } from "../error/message";
+import { ID_REQUIRED, INVALID_CREDIENTIALS, PASSWORD_ALREADY_EXIST, USER_ALREADY_EXIST, USER_DOES_NOT_EXIST } from "../error/message";
 import { IdentityService } from "./identity_service";
 import { hash } from "crypto";
 import { OtpService } from "./otp_service";
@@ -101,8 +101,25 @@ export class UserService implements IdentityService {
         var passwordIsNotMatch: boolean = user?.password !== hash("sha256", request.password);
         if(passwordIsNotMatch) {throw new AppError("Invalid credentials", 401);}
         
-        if(!user.is_enabled)    {return await this.initLogin(user);
+        if(!user.is_enabled)    {return await this.sendMailOtp(user);
         }else   {return await this.accessToken(user);} 
+    }
+
+    async initLogin(request: UserDto): Promise<UserDto> {
+        request.action_type = "init_login";
+        await this.validateRequest(request);
+        
+        if(!await this.isExistingUser(request)){
+            throw new AppError(USER_DOES_NOT_EXIST, 400);
+        }
+        
+        var foundUser: User = await this.users.findOne({ where: { email: request.email } })
+        var isCredientialValid = await this.otpService.verify(foundUser.id, request.otp);
+        if(!isCredientialValid) throw new AppError(INVALID_CREDIENTIALS, 400);
+
+        var newToken : string = await this.auth_service.generateToken(foundUser.id);
+        request.access_token = newToken;
+        return request;
     }
 
 
@@ -119,7 +136,7 @@ export class UserService implements IdentityService {
         return userDto;
     }
 
-    private async initLogin(user: User) {
+    private async sendMailOtp(user: User) {
         var otp: string = await this.otpService.generate(user.id);
         console.log("Otp is this ", otp);
         var message = `<h1>Please confirm your email </h1>

@@ -19,19 +19,20 @@ const user_model_1 = require("../data/entity/user_model");
 const user_repository_1 = require("../data/repository/user.repository");
 const message_1 = require("../error/message");
 const crypto_1 = require("crypto");
+const otp_generator_service_1 = require("./otp_generator_service");
+const node_mailer_service_1 = require("./node_mailer_service");
+const jwt_auth_service_1 = require("./jwt_auth_service");
 class UserService {
     constructor() {
         this.users = user_repository_1.userRepository;
+        this.otpService = new otp_generator_service_1.otpGeneratorService();
+        this.emailService = new node_mailer_service_1.NodeMailerService();
+        this.auth_service = new jwt_auth_service_1.JwtService();
     }
     createUser(request) {
         return __awaiter(this, void 0, void 0, function* () {
             request.action_type = "create_user";
-            const error = yield (0, class_validator_1.validate)(request);
-            const isError = error.length > 0;
-            if (isError) {
-                const errorResponse = (0, formatter_1.formatError)(error);
-                throw new app_error_1.AppError(JSON.stringify(errorResponse), errorResponse.statusCode);
-            }
+            yield this.validateRequest(request);
             if (yield this.isExistingUser(request))
                 throw new app_error_1.AppError(message_1.USER_ALREADY_EXIST, 400);
             var user = mapper_1.mapper.map(request, user_1.UserDto, user_model_1.User);
@@ -42,35 +43,124 @@ class UserService {
     createPassword(request) {
         return __awaiter(this, void 0, void 0, function* () {
             request.action_type = "create_password";
+            yield this.validateRequest(request);
+            if (!(yield this.isExistingUser(request)))
+                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
+            else if (yield this.isPasswordExisting(request)) {
+                throw new app_error_1.AppError(message_1.PASSWORD_ALREADY_EXIST, 400);
+            }
+            ;
+            yield this.users.update({ id: request.id }, { password: (0, crypto_1.hash)("sha256", request.password) });
+            return mapper_1.mapper.map(yield this.users.findOne({ where: { id: request.id } }), user_model_1.User, user_1.UserDto);
+        });
+    }
+    updateUser(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            request.action_type = "update_user";
+            yield this.validateRequest(request);
+            if (!(yield this.isExistingUser(request)))
+                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
+            yield this.users.update({ id: request.id }, { first_name: request.first_name, last_name: request.last_name, phone_number: request.phone_number });
+            const updatedUser = yield this.users.findOne({ where: { id: request.id } });
+            return mapper_1.mapper.map(updatedUser, user_model_1.User, user_1.UserDto);
+        });
+    }
+    getUserById(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!id) {
+                throw new app_error_1.AppError(message_1.ID_REQUIRED, 400);
+            }
+            const foundUser = yield this.users.findOne({ where: { id: id } });
+            if (!foundUser)
+                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
+            return mapper_1.mapper.map(foundUser, user_model_1.User, user_1.UserDto);
+        });
+    }
+    getAllUsers() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const users = yield this.users.find({ where: { is_active: true } });
+            return users.map(user => mapper_1.mapper.map(user, user_model_1.User, user_1.UserDto));
+        });
+    }
+    deleteUser(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!id) {
+                throw new app_error_1.AppError(message_1.ID_REQUIRED, 400);
+            }
+            var foundUser = yield this.users.findOne({ where: { id: id } });
+            if (!foundUser)
+                return;
+            if (foundUser.is_active) {
+                yield this.users.update({ id: id }, { is_active: false });
+                return;
+            }
+        });
+    }
+    login(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            request.action_type = "login";
+            yield this.validateRequest(request);
+            if (!(yield this.isExistingUser(request)))
+                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
+            var user = yield this.users.findOne({ where: { email: request.email } });
+            var passwordIsNotMatch = (user === null || user === void 0 ? void 0 : user.password) !== (0, crypto_1.hash)("sha256", request.password);
+            if (passwordIsNotMatch) {
+                throw new app_error_1.AppError("Invalid credentials", 401);
+            }
+            if (!user.is_enabled) {
+                return yield this.sendMailOtp(user);
+            }
+            else {
+                return yield this.accessToken(user);
+            }
+        });
+    }
+    initLogin(request) {
+        return __awaiter(this, void 0, void 0, function* () {
+            request.action_type = "init_login";
+            yield this.validateRequest(request);
+            if (!(yield this.isExistingUser(request))) {
+                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
+            }
+            var foundUser = yield this.users.findOne({ where: { email: request.email } });
+            var isCredientialValid = yield this.otpService.verify(foundUser.id, request.otp);
+            if (!isCredientialValid)
+                throw new app_error_1.AppError(message_1.INVALID_CREDIENTIALS, 400);
+            var newToken = yield this.auth_service.generateToken(foundUser.id);
+            request.access_token = newToken;
+            return request;
+        });
+    }
+    accessToken(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var token = yield this.auth_service.generateToken(user.id);
+            console.log("Token is this ", token);
+            var userDto = mapper_1.mapper.map(user, user_model_1.User, user_1.UserDto);
+            userDto.access_token = token;
+            return userDto;
+        });
+    }
+    sendMailOtp(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var otp = yield this.otpService.generate(user.id);
+            console.log("Otp is this ", otp);
+            var message = `<h1>Please confirm your email </h1>
+                        <p> here is your OTP code:-> ${otp} </p>`;
+            yield this.emailService.sendEmail(user.email, "Your OTP Code", message);
+            user.is_enabled = true;
+            yield this.users.update({ id: user.id }, { is_enabled: true });
+            return mapper_1.mapper.map(user, user_model_1.User, user_1.UserDto);
+        });
+    }
+    validateRequest(request) {
+        return __awaiter(this, void 0, void 0, function* () {
             const error = yield (0, class_validator_1.validate)(request);
             const isError = error.length > 0;
             if (isError) {
                 const errorResponse = (0, formatter_1.formatError)(error);
                 throw new app_error_1.AppError(JSON.stringify(errorResponse), errorResponse.statusCode);
             }
-            if (!(yield this.isExistingUser(request)))
-                throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
-            else if (yield this.isPasswordExisting(request)) {
-                throw new app_error_1.AppError("Password already exists", 400);
-            }
-            ;
-            const hashedPassword = (0, crypto_1.hash)("sha256", request.password);
-            yield this.users.update({ id: request.id }, { password: hashedPassword });
-            const updatedUser = yield this.users.findOne({ where: { id: request.id } });
-            return mapper_1.mapper.map(updatedUser, user_model_1.User, user_1.UserDto);
         });
-    }
-    getUserById(id) {
-        throw new Error("Method not implemented.");
-    }
-    getAllUsers() {
-        throw new Error("Method not implemented.");
-    }
-    updateUser(request) {
-        throw new Error("Method not implemented.");
-    }
-    deleteUser(id) {
-        throw new Error("Method not implemented.");
     }
     isExistingUser(request) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -87,7 +177,6 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             if (request.id) {
                 const user = yield this.users.findOneBy({ id: request.id });
-                console.log("User in is password existing", (user === null || user === void 0 ? void 0 : user.password) !== null);
                 return (user === null || user === void 0 ? void 0 : user.password) !== null;
             }
             else if (request.email) {

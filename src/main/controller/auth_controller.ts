@@ -14,10 +14,20 @@ export class AuthController {
             const user = await this.userService.login(userDto);
             res.status(200).json(user);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            res.status(error.statusCode).json({ message: error.message });
         }
-    }
+    };
 
-    
+    static initLogin = async(req: Request, res : Response) => {
+        try{
+            const userDto: UserDto = plainToInstance(UserDto, req.body);
+            const loginUser = await this.userService.login(userDto);
+            res.status(200).json(loginUser);
+        }catch(error){
+            res.status(error.statusCode).json({message: error.message});
+        }
+    };
+
+
 
 }

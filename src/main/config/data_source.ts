@@ -13,7 +13,7 @@ export const PostgresDataSource  : DataSource = new DataSource({
     entities: ["dist/main/data/entity/*.js"],
     migrations: [],
     subscribers: [],
-})
+});
 
 
 export default async function initializeDataSource() {
@@ -23,6 +23,6 @@ export default async function initializeDataSource() {
                     }).catch((err) => {
                         console.error("Error during Data Source initialization" , err)
                     });
-}
+};
 
 

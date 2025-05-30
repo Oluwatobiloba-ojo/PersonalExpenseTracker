@@ -13,5 +13,7 @@ export interface IdentityService {
 
     createPassword(request: UserDto): Promise<UserDto>;
 
-    login(request: UserDto): Promise<UserDto>
+    login(request: UserDto): Promise<UserDto>;
+
+    initLogin(request: UserDto): Promise<UserDto>;
 }

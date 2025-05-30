@@ -81,6 +81,11 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "is_active", void 0);
 __decorate([
+    (0, classes_1.AutoMap)(),
+    (0, typeorm_1.Column)({ type: "boolean", default: false }),
+    __metadata("design:type", Boolean)
+], User.prototype, "is_enabled", void 0);
+__decorate([
     (0, typeorm_1.BeforeInsert)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

@@ -1,5 +1,5 @@
 import { AutoMap } from "@automapper/classes";
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber, IsStrongPassword, Matches, ValidateIf } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumberString, IsOptional, IsPhoneNumber, IsStrongPassword, Length, Matches, ValidateIf } from "class-validator";
 
 export class UserDto {
 
@@ -19,7 +19,7 @@ export class UserDto {
     last_name: string;
 
     @AutoMap()
-    @ValidateIf((o) => o.action_type === "create_user" || o.action_type === "login")
+    @ValidateIf((o) => o.action_type === "create_user" || o.action_type === "login" || o.action_type === "init_login")
     @IsNotEmpty({message: "Email is required"})
     @IsEmail({}, {message: "Email must be a valid email address."})
     email: string;
@@ -50,6 +50,12 @@ export class UserDto {
     action_type: string;
 
     access_token: string;
+
+    @ValidateIf((o) => o.action_type === "init_login")
+    @IsNotEmpty({message: "OTP is required"})
+    @IsNumberString({no_symbols: true}, {message: "OTP must be a valid number."})
+    @Length(6, 6, {message: "OTP must be exactly 6 digits."})
+    otp: string;
 }
 
 
