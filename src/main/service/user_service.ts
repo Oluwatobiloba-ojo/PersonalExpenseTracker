@@ -25,13 +25,17 @@ export class UserService implements IdentityService {
 
     async createUser(request: UserDto) : Promise<UserDto> {
         request.action_type = "create_user";
-
+        console.log("Entered here => ", request);
         await this.validateRequest(request);
+        console.log("Done validating ", request);
 
         if(await this.isExistingUser(request))throw new AppError(USER_ALREADY_EXIST, 400);
+        console.log("Done verifying if user exist");
     
         var user: User = mapper.map(request, UserDto, User);
+        console.log("Done mapping user ", user);
         user = await this.users.save(user);
+        console.log("Done saving user ", user);
         return mapper.map(user, User, UserDto);
     }
 
@@ -109,15 +113,18 @@ export class UserService implements IdentityService {
         request.action_type = "init_login";
         await this.validateRequest(request);
         
-        if(!await this.isExistingUser(request)){
-            throw new AppError(USER_DOES_NOT_EXIST, 400);
-        }
+        if(!await this.isExistingUser(request))  throw new AppError(USER_DOES_NOT_EXIST, 400);
         
         var foundUser: User = await this.users.findOne({ where: { email: request.email } })
         var isCredientialValid = await this.otpService.verify(foundUser.id, request.otp);
+        
         if(!isCredientialValid) throw new AppError(INVALID_CREDIENTIALS, 400);
 
+        foundUser.is_enabled = true;
+        await this.users.update({ id: foundUser.id }, { is_enabled: true });
+
         var newToken : string = await this.auth_service.generateToken(foundUser.id);
+        request = mapper.map(foundUser, User, UserDto);
         request.access_token = newToken;
         return request;
     }
@@ -142,8 +149,6 @@ export class UserService implements IdentityService {
         var message = `<h1>Please confirm your email </h1>
                         <p> here is your OTP code:-> ${otp} </p>`;
         await this.emailService.sendEmail(user.email, "Your OTP Code", message);
-        user.is_enabled = true;
-        await this.users.update({ id: user.id }, { is_enabled: true });
         return mapper.map(user, User, UserDto);
     }
 

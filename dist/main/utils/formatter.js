@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatError = formatError;
+exports.formatErrorResponse = formatErrorResponse;
 const response_1 = require("../error/response");
 function formatError(validationErrors) {
     const messageData = new Map(validationErrors
@@ -21,5 +22,10 @@ function getMessage(messages) {
         }
         return "";
     }
+}
+function formatErrorResponse(error) {
+    return {
+        "body": JSON.parse(error.message)
+    };
 }
 //# sourceMappingURL=formatter.js.map

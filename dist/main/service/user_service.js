@@ -32,11 +32,16 @@ class UserService {
     createUser(request) {
         return __awaiter(this, void 0, void 0, function* () {
             request.action_type = "create_user";
+            console.log("Entered here => ", request);
             yield this.validateRequest(request);
+            console.log("Done validating ", request);
             if (yield this.isExistingUser(request))
                 throw new app_error_1.AppError(message_1.USER_ALREADY_EXIST, 400);
+            console.log("Done verifying if user exist");
             var user = mapper_1.mapper.map(request, user_1.UserDto, user_model_1.User);
+            console.log("Done mapping user ", user);
             user = yield this.users.save(user);
+            console.log("Done saving user ", user);
             return mapper_1.mapper.map(user, user_model_1.User, user_1.UserDto);
         });
     }
@@ -119,14 +124,16 @@ class UserService {
         return __awaiter(this, void 0, void 0, function* () {
             request.action_type = "init_login";
             yield this.validateRequest(request);
-            if (!(yield this.isExistingUser(request))) {
+            if (!(yield this.isExistingUser(request)))
                 throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
-            }
             var foundUser = yield this.users.findOne({ where: { email: request.email } });
             var isCredientialValid = yield this.otpService.verify(foundUser.id, request.otp);
             if (!isCredientialValid)
                 throw new app_error_1.AppError(message_1.INVALID_CREDIENTIALS, 400);
+            foundUser.is_enabled = true;
+            yield this.users.update({ id: foundUser.id }, { is_enabled: true });
             var newToken = yield this.auth_service.generateToken(foundUser.id);
+            request = mapper_1.mapper.map(foundUser, user_model_1.User, user_1.UserDto);
             request.access_token = newToken;
             return request;
         });
@@ -147,8 +154,6 @@ class UserService {
             var message = `<h1>Please confirm your email </h1>
                         <p> here is your OTP code:-> ${otp} </p>`;
             yield this.emailService.sendEmail(user.email, "Your OTP Code", message);
-            user.is_enabled = true;
-            yield this.users.update({ id: user.id }, { is_enabled: true });
             return mapper_1.mapper.map(user, user_model_1.User, user_1.UserDto);
         });
     }

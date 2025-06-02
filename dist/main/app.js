@@ -16,8 +16,11 @@ const express_1 = __importDefault(require("express"));
 const data_source_1 = __importDefault(require("./config/data_source"));
 const user_mapper_1 = require("./mapper/user_mapper");
 const configuration_1 = __importDefault(require("./config/configuration"));
+const router_1 = __importDefault(require("./router/router"));
 const app = (0, express_1.default)();
 const port = configuration_1.default.PORT;
+app.use(express_1.default.json());
+app.use(router_1.default);
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });

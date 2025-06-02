@@ -14,6 +14,7 @@ exports.UserController = void 0;
 const user_1 = require("../dto/request/user");
 const class_transformer_1 = require("class-transformer");
 const user_service_1 = require("../service/user_service");
+const formatter_1 = require("../utils/formatter");
 class UserController {
 }
 exports.UserController = UserController;
@@ -26,7 +27,8 @@ UserController.regsiter = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(201).json(user);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        console.log("ERROR IS THIS ", error);
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 UserController.createPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,7 +38,7 @@ UserController.createPassword = (req, res) => __awaiter(void 0, void 0, void 0, 
         res.status(200).json(user);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 UserController.updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {

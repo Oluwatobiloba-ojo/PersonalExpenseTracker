@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controller/auth_controller";
 
-var authRoutePath: string = "api/v1/auth";
+var authRoutePath: string = "/api/v1/auth";
 
 export function AuthRoute(route: Router){
 

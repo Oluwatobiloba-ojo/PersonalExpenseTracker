@@ -533,9 +533,6 @@ describe("User service Test: ", () => {
             const response = await userService.login(userDto);
             expect(response).toBeTruthy();
             expect(response.access_token).toBeFalsy();
-            expect(response.is_enabled).toBeTruthy();
-            expect(userRepository.update).toHaveBeenCalledTimes(1);
-            expect(userRepository.update).toHaveBeenCalledWith({ id: user.id }, { is_enabled: true });
             expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
             expect(generateOtpService.generate).toHaveBeenCalledTimes(1);
             expect(generateOtpService.generate).toHaveBeenCalledWith(user.id);
@@ -629,15 +626,9 @@ describe("User service Test: ", () => {
             var response : UserDto = await userService.initLogin(userDto);
             console.log("Response is this ", response);
             expect(response.access_token).toBeTruthy();
+            expect(response.is_enabled).toBeTruthy();
+            expect(userRepository.update).toHaveBeenCalledTimes(1);
+            expect(userRepository.update).toHaveBeenCalledWith({ id: user.id }, { is_enabled: true });
         });
     });
-
-
-
-
-
-
-
-
-
 });

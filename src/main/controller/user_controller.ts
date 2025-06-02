@@ -3,6 +3,7 @@ import { UserDto } from "../dto/request/user";
 import { plainToInstance } from "class-transformer";
 import { IdentityService } from "../service/identity_service";
 import { UserService } from "../service/user_service";
+import { formatErrorResponse } from "../utils/formatter";
 
 export class UserController {
 
@@ -14,7 +15,7 @@ export class UserController {
             const user = await this.userService.createUser(userDto);
             res.status(201).json(user);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            res.status(error.statusCode).json(formatErrorResponse(error));
         }
     };
 
@@ -24,7 +25,7 @@ export class UserController {
             const user = await this.userService.createPassword(userDto);
             res.status(200).json(user);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            res.status(error.statusCode).json(formatErrorResponse(error));
         }
     };
 
@@ -34,7 +35,7 @@ export class UserController {
             const updatedUser = await this.userService.updateUser(userDto);
             res.status(200).json(updatedUser);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            res.status(error.statusCode).json(formatErrorResponse(error));
         }
     };
 
@@ -44,7 +45,7 @@ export class UserController {
             const user = await this.userService.getUserById(userId);
             res.status(200).json(user);
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            res.status(error.statusCode).json(formatErrorResponse(error));
         }
     };
 

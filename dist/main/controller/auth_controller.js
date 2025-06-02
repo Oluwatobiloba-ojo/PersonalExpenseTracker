@@ -26,13 +26,13 @@ AuthController.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(200).json(user);
     }
     catch (error) {
-        res.status(error.statusCode).json({ message: error.message });
+        res.status(error.statusCode).json(error.message);
     }
 });
 AuthController.initLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userDto = (0, class_transformer_1.plainToInstance)(user_1.UserDto, req.body);
-        const loginUser = yield _a.userService.login(userDto);
+        const loginUser = yield _a.userService.initLogin(userDto);
         res.status(200).json(loginUser);
     }
     catch (error) {
