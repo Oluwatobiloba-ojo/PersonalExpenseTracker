@@ -27,7 +27,6 @@ UserController.regsiter = (req, res) => __awaiter(void 0, void 0, void 0, functi
         res.status(201).json(user);
     }
     catch (error) {
-        console.log("ERROR IS THIS ", error);
         res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
@@ -48,7 +47,7 @@ UserController.updateUser = (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(200).json(updatedUser);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 UserController.getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -58,7 +57,7 @@ UserController.getUserById = (req, res) => __awaiter(void 0, void 0, void 0, fun
         res.status(200).json(user);
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 //# sourceMappingURL=user_controller.js.map

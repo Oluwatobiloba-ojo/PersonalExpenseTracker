@@ -14,6 +14,7 @@ exports.AuthController = void 0;
 const class_transformer_1 = require("class-transformer");
 const user_1 = require("../dto/request/user");
 const user_service_1 = require("../service/user_service");
+const formatter_1 = require("../utils/formatter");
 class AuthController {
 }
 exports.AuthController = AuthController;
@@ -26,7 +27,7 @@ AuthController.login = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(200).json(user);
     }
     catch (error) {
-        res.status(error.statusCode).json(error.message);
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 AuthController.initLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,7 +37,7 @@ AuthController.initLogin = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(200).json(loginUser);
     }
     catch (error) {
-        res.status(error.statusCode).json({ message: error.message });
+        res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });
 //# sourceMappingURL=auth_controller.js.map
