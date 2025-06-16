@@ -115,7 +115,8 @@ export class UserService implements IdentityService {
         
         if(!await this.isExistingUser(request))  throw new AppError(USER_DOES_NOT_EXIST, 400);
         
-        var foundUser: User = await this.users.findOne({ where: { email: request.email } })
+        var foundUser: User = await this.users.findOne({ where: { email: request.email } });
+        console.log("FOund user is this ", foundUser);
         var isCredientialValid = await this.otpService.verify(foundUser.id, request.otp);
         
         if(!isCredientialValid) throw new AppError(INVALID_CREDIENTIALS, 400);

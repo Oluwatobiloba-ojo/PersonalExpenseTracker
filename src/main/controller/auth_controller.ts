@@ -25,6 +25,7 @@ export class AuthController {
             const loginUser = await this.userService.initLogin(userDto);
             res.status(200).json(loginUser);
         }catch(error){
+            console.log("Error is this ", error);
             res.status(error.statusCode).json(formatErrorResponse(error));
         }
     };

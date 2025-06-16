@@ -12,7 +12,7 @@ export class otpGeneratorService implements OtpService {
     async generate(user_id: string): Promise<string> {
         
         var otp: OtpModel = new OtpModel();
-        otp.user_id = user_id;
+        otp.user = { id: user_id } as any;
         otp.otp = otp_generator.generate(6, {upperCaseAlphabets: false,lowerCaseAlphabets: false,specialChars: false,});
         otp.created_at = new Date();
         var savedOtp: OtpModel = await this.otps.save(otp);
@@ -22,10 +22,13 @@ export class otpGeneratorService implements OtpService {
 
 
     async verify(user_id: string, otp: string): Promise<boolean> {
-        var foundOtp = await this.otps.findOne({ where: { user_id: user_id } });
+        var foundOtp = await this.otps.findOne({ where: {user:
+            {id: user_id}}});
+        console.log("Founding otp ", foundOtp);
         if (!foundOtp) {
             throw new AppError("OTP not found for the given user ID.", 400);
         }
+        console.log("Found otp is this ", foundOtp);
         if (foundOtp.otp !== otp) {return false;}
         return true;
     }

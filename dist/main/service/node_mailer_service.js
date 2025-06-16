@@ -59,12 +59,14 @@ class NodeMailerService {
                         pass: configuration_1.default.MAIL_PASS,
                     }
                 });
+                console.log("Created transporter ", transporter);
                 let info = yield transporter.sendMail({
                     from: configuration_1.default.OWNER_EMAIL,
                     to: to,
                     subject: subject,
                     html: body,
                 });
+                // console.log("send mail ", info);
                 console.log("Info is here: ", info);
             }
             catch (error) {

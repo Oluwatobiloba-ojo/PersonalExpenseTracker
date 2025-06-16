@@ -13,7 +13,8 @@ export class NodeMailerService implements EmailService {
                         user: config.MAIL_USER, 
                         pass: config.MAIL_PASS,
                     }
-            }) 
+            });
+            console.log("Created transporter ", transporter);
     
             let info = await transporter.sendMail({
                 from: config.OWNER_EMAIL,
@@ -21,6 +22,8 @@ export class NodeMailerService implements EmailService {
                 subject: subject,
                 html: body,
             })
+
+            // console.log("send mail ", info);
     
             console.log("Info is here: ",info)
         } catch (error) {

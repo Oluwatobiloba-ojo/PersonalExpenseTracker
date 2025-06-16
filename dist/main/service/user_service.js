@@ -127,6 +127,7 @@ class UserService {
             if (!(yield this.isExistingUser(request)))
                 throw new app_error_1.AppError(message_1.USER_DOES_NOT_EXIST, 400);
             var foundUser = yield this.users.findOne({ where: { email: request.email } });
+            console.log("FOund user is this ", foundUser);
             var isCredientialValid = yield this.otpService.verify(foundUser.id, request.otp);
             if (!isCredientialValid)
                 throw new app_error_1.AppError(message_1.INVALID_CREDIENTIALS, 400);

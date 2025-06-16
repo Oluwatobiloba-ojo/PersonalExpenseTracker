@@ -16,7 +16,7 @@ export const config = {
     MAIL_PASS: process.env.MAIL_PASS,
     OWNER_EMAIL: process.env.OWNER_EMAIL,
     JWT_SECRET: process.env.JWT_SECRET,
-    EXPIRATION_SECONDS: process.env.EXPIRATION_SECONDS,
+    EXPIRATION_SECONDS: process.env.JWT_EXPIRATION,
 }
 
 export default config;

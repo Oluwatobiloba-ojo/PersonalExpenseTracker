@@ -37,6 +37,7 @@ AuthController.initLogin = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(200).json(loginUser);
     }
     catch (error) {
+        console.log("Error is this ", error);
         res.status(error.statusCode).json((0, formatter_1.formatErrorResponse)(error));
     }
 });

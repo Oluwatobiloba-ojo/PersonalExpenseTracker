@@ -25,7 +25,7 @@ function getMessage(messages) {
 }
 function formatErrorResponse(error) {
     return {
-        "body": JSON.parse(error.message)
+        "body": typeof (error.message) === "string" ? error.message : JSON.parse(error.message)
     };
 }
 //# sourceMappingURL=formatter.js.map

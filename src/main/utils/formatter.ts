@@ -1,6 +1,7 @@
 import { ValidationError } from "class-validator";
 import { errorResponse } from "../error/response";
 import { AppError } from "../error/app_error";
+import { strict } from "assert";
 
 export function formatError(validationErrors: ValidationError[]) {
     const messageData = new Map<string, string>(
@@ -29,6 +30,6 @@ function getMessage(messages: { [type: string]: string }): string  {
 
 export function formatErrorResponse(error:AppError){
     return {
-        "body": JSON.parse(error.message)
+        "body": typeof(error.message) === "string" ? error.message : JSON.parse(error.message)
     };
 }

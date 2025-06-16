@@ -28,9 +28,10 @@ __decorate([
     __metadata("design:type", Date)
 ], OtpModel.prototype, "created_at", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => user_model_1.User, (user) => user.id, { eager: true }),
-    __metadata("design:type", String)
-], OtpModel.prototype, "user_id", void 0);
+    (0, typeorm_1.OneToOne)(() => user_model_1.User, { eager: true }),
+    (0, typeorm_1.JoinColumn)({ name: "user_id" }),
+    __metadata("design:type", user_model_1.User)
+], OtpModel.prototype, "user", void 0);
 exports.OtpModel = OtpModel = __decorate([
     (0, typeorm_1.Entity)("otps")
 ], OtpModel);

@@ -9,7 +9,7 @@ var jwtService: AuthService = new JwtService();
 export function UserRoute(route: Router){
 
     route.post(userRoutePath, UserController.regsiter);
-    route.get(userRoutePath, [jwtService.verifyToken], UserController.getUserById);
+    route.get(userRoutePath, [ jwtService.verifyToken ], UserController.getUserById);
     route.patch(userRoutePath, UserController.updateUser);
     route.post(userRoutePath+"/password", UserController.createPassword);
 

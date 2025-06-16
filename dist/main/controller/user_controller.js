@@ -52,7 +52,7 @@ UserController.updateUser = (req, res) => __awaiter(void 0, void 0, void 0, func
 });
 UserController.getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = req.params.id;
+        const userId = res.locals.username;
         const user = yield _a.userService.getUserById(userId);
         res.status(200).json(user);
     }

@@ -54,7 +54,7 @@ class otpGeneratorService {
     generate(user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             var otp = new otp_model_1.OtpModel();
-            otp.user_id = user_id;
+            otp.user = { id: user_id };
             otp.otp = otp_generator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false, });
             otp.created_at = new Date();
             var savedOtp = yield this.otps.save(otp);
@@ -64,10 +64,12 @@ class otpGeneratorService {
     }
     verify(user_id, otp) {
         return __awaiter(this, void 0, void 0, function* () {
-            var foundOtp = yield this.otps.findOne({ where: { user_id: user_id } });
+            var foundOtp = yield this.otps.findOne({ where: { user: { id: user_id } } });
+            console.log("Founding otp ", foundOtp);
             if (!foundOtp) {
                 throw new app_error_1.AppError("OTP not found for the given user ID.", 400);
             }
+            console.log("Found otp is this ", foundOtp);
             if (foundOtp.otp !== otp) {
                 return false;
             }
